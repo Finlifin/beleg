@@ -1,5 +1,6 @@
 # Meson build directories and files
 build/
+.cache/
 meson-private/
 meson-logs/
 meson-info/
