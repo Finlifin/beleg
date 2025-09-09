@@ -1,14 +1,14 @@
-#include "../includes/common.h"
+#include "common.hh"
+#include "lex/lex.hh"
 #include <iostream>
+#include <print>
 
-#define PROJECT_NAME "beleg"
+auto main() -> int {
+    auto and_ = Token(TokenKind::And, 0, 3);
+    auto or_ = Token(TokenKind::Or, 4, 6);
+    auto plus = Token(TokenKind::Plus, 7, 8);
 
-int main(int argc, char **argv) {
-  if (argc != 1) {
-    std::cout << argv[0] << " takes no arguments.\n";
-    return 1;
-  }
-  String project_name = PROJECT_NAME;
-  std::cout << "This is project " << project_name << ".\n";
-  return 0;
+    std::println("{}, {}, {}", and_, or_, plus);
+
+    return 0;
 }

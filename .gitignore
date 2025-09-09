@@ -11,6 +11,11 @@ compile_commands.json
 *.o
 *.a
 
+# Subprojects - only keep .wrap files and lock files
+subprojects/*
+!subprojects/*.wrap
+!subprojects/.wraplock
+
 # IDE files
 .vscode/
 .idea/
