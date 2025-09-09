@@ -1,0 +1,19 @@
+# Meson build directories and files
+build/
+meson-private/
+meson-logs/
+meson-info/
+
+# Generated files
+compile_commands.json
+*.exe
+*.o
+*.a
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
