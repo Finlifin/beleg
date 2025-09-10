@@ -2,66 +2,53 @@
 #define LEX_HH
 
 #include "common.hh"
-#include "magic_enum/magic_enum.hpp"
 #include <format>
+#include <string_view>
 
 enum class TokenKind {
     // operators
-    Plus,             // +
-    PlusEq,           // +=
-    PlusPlus,         // ++
-    SeparatedPlus,    // " + "
-    Lt,               // <
-    LtEq,             // <=
-    SeparatedLt,      // " < "
-    Gt,               // >
-    GtEq,             // >=
-    SeparatedGt,      // " > "
-    Bang,             // !
-    BangEq,           // !=
-    Minus,            // -
-    Arrow,            // ->
-    MinusEq,          // -=
-    SeparatedMinus,   // " - "
-    Dot,              // .
-    Colon,            // :
-    ColonColon,       // ::
-    ColonTilde,       // :~
-    ColonMinus,       // :-
-    Star,             // *
-    StarEq,           // *=
-    SeparatedStar,    // " * "
-    Slash,            // /
-    SlashEq,          // /=
-    SeparatedSlash,   // " / "
-    Percent,          // %
-    PercentEq,        // %=
-    SeparatedPercent, // " % "
-    Eq,               // =
-    FatArrow,         // =>
-    EqEq,             // ==
-    EqEqEq,           // ==>
-    Tilde,            // ~
-    TildeGt,          // ~>
-    Pipe,             // |
-    PipeGt,           // |>
-    Hash,             // #
-    Question,         // ?
-    Backslash,        // {\}
-    Ampersand,        // &
-    LBracket,         // [
-    RBracket,         // ]
-    LParen,           // (
-    RParen,           // )
-    LBrace,           // {
-    RBrace,           // }
-    Comma,            // ,
-    Quote,            // '
-    Semi,             // ;
-    Caret,            // ^
-    Dollar,           // $
-    At,               // @
-    Underscore,       // _
+    Plus,       // +
+    PlusEq,     // +=
+    PlusPlus,   // ++
+    Lt,         // <
+    LtEq,       // <=
+    Gt,         // >
+    GtEq,       // >=
+    Bang,       // !
+    BangEq,     // !=
+    Minus,      // -
+    Arrow,      // ->
+    MinusEq,    // -=
+    Dot,        // .
+    Colon,      // :
+    Star,       // *
+    StarEq,     // *=
+    Slash,      // /
+    SlashEq,    // /=
+    Percent,    // %
+    PercentEq,  // %=
+    Eq,         // =
+    FatArrow,   // =>
+    EqEq,       // ==
+    Tilde,      // ~
+    Pipe,       // |
+    Hash,       // #
+    Question,   // ?
+    Backslash,  // {\}
+    Ampersand,  // &
+    LBracket,   // [
+    RBracket,   // ]
+    LParen,     // (
+    RParen,     // )
+    LBrace,     // {
+    RBrace,     // }
+    Comma,      // ,
+    Quote,      // '
+    Semi,       // ;
+    Caret,      // ^
+    Dollar,     // $
+    At,         // @
+    Underscore, // _
 
     // primitive literals
     Str,     // "..."
@@ -120,7 +107,10 @@ enum class TokenKind {
     Invalid, // invalid token
     Sof,     // start of file
     Eof,     // end of file
+
 };
+
+auto lexeme(TokenKind kind) -> std::string_view;
 
 struct Token {
     TokenKind kind;
@@ -138,8 +128,8 @@ struct std::formatter<TokenKind> {
     }
 
     auto format(TokenKind kind, std::format_context& ctx) const {
-        std::string_view name = magic_enum::enum_name(kind);
-        return std::format_to(ctx.out(), "{}", name);
+        std::string_view str = lexeme(kind);
+        return std::format_to(ctx.out(), "{}", str);
     }
 };
 
@@ -152,5 +142,30 @@ struct std::formatter<Token> {
     auto format(Token token, std::format_context& ctx) const {
         return std::format_to(ctx.out(), "Token({}, {}, {})", token.kind, token.start, token.end);
     }
+};
+
+struct Lexer {
+    std::string_view src;
+    usize cursor;
+
+    Lexer(std::string_view src) : src(src), cursor(0) {
+    }
+
+    auto next() -> Token;
+
+    auto current_char() -> std::optional<char> {
+        if (cursor >= src.size()) {
+            return std::nullopt;
+        }
+        return src[cursor];
+    }
+
+    auto peek(std::string_view str) -> bool;
+
+    auto recognize_identifier() -> Token;
+    auto recognize_string_literal() -> Token;
+    auto recognize_number() -> Token;
+    auto recognize_char() -> Token;
+    auto is_keyword(std::string_view ident) -> std::optional<TokenKind>;
 };
 #endif

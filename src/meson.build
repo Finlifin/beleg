@@ -1,3 +1,4 @@
+subdir('source_map')
 subdir('ast')
 subdir('codegen')
 subdir('diag')
@@ -6,7 +7,6 @@ subdir('hir')
 subdir('intern')
 subdir('lex')
 subdir('parse')
-subdir('source_map')
 
 inc = [include_directories('.')]
 
