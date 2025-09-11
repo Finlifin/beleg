@@ -2,11 +2,11 @@
 #include "driver/driver.hh"
 
 class DriverTest : public ::testing::Test {
-protected:
+  protected:
     void SetUp() override {
         // Setup code for each test
     }
-    
+
     void TearDown() override {
         // Cleanup code for each test
     }
@@ -23,4 +23,5 @@ TEST_F(DriverTest, AnotherTestCase) {
     EXPECT_EQ(1, 1); // Placeholder test
 }
 
-// Main function is provided by gtest_main_dep, so no need to define it
+// Main function is provided by gtest_main_dep, so no need
+// to define it

@@ -38,7 +38,8 @@ struct Location {
     }
 
     bool operator==(const Location& other) const {
-        return file == other.file && line == other.line && column == other.column;
+        return file == other.file && line == other.line
+               && column == other.column;
     }
 };
 
@@ -92,7 +93,8 @@ struct SourceFile {
     auto get_line(u32 line_number) const -> std::optional<std::string_view>;
 
     // 获取 span 对应的源码文本
-    auto get_span_text(const Span& span) const -> std::optional<std::string_view>;
+    auto get_span_text(const Span& span) const
+        -> std::optional<std::string_view>;
 
   private:
     auto compute_line_starts() -> void;
@@ -109,7 +111,8 @@ class SourceMap {
     SourceMap() = default;
 
     // 添加源文件
-    auto add_file(const std::string& name, const std::string& content) -> FileId;
+    auto add_file(const std::string& name, const std::string& content)
+        -> FileId;
 
     // 从文件系统加载文件
     auto load_file(const std::string& path) -> std::optional<FileId>;
@@ -130,11 +133,15 @@ class SourceMap {
     auto get_span_text(const Span& span) const -> std::optional<std::string>;
 
     // 获取指定位置的行内容
-    auto get_line_at_location(const Location& loc) const -> std::optional<std::string_view>;
+    auto get_line_at_location(const Location& loc) const
+        -> std::optional<std::string_view>;
 
     // 创建一个新的 span
-    auto make_span(FileId file_id, u32 start_line, u32 start_col, u32 end_line, u32 end_col) const
-        -> Span;
+    auto make_span(FileId file_id,
+                   u32 start_line,
+                   u32 start_col,
+                   u32 end_line,
+                   u32 end_col) const -> Span;
 
     // 获取所有文件
     auto get_files() const -> const std::vector<SourceFile>& {

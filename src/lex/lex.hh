@@ -117,7 +117,8 @@ struct Token {
     u32 start;
     u32 end;
 
-    Token(TokenKind kind, u32 start, u32 end) : kind(kind), start(start), end(end) {
+    Token(TokenKind kind, u32 start, u32 end)
+        : kind(kind), start(start), end(end) {
     }
 };
 
@@ -140,7 +141,11 @@ struct std::formatter<Token> {
     }
 
     auto format(Token token, std::format_context& ctx) const {
-        return std::format_to(ctx.out(), "Token({}, {}, {})", token.kind, token.start, token.end);
+        return std::format_to(ctx.out(),
+                              "Token({}, {}, {})",
+                              token.kind,
+                              token.start,
+                              token.end);
     }
 };
 

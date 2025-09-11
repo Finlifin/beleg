@@ -197,7 +197,8 @@ class Child {
     }
 
     auto as_multiple() const -> std::span<const NodeIndex> {
-        return std::span<const NodeIndex>(std::get<std::vector<NodeIndex>>(data_));
+        return std::span<const NodeIndex>(
+            std::get<std::vector<NodeIndex>>(data_));
     }
 
   private:
@@ -206,7 +207,8 @@ class Child {
 
     Child(Kind kind, NodeIndex index) : kind_(kind), data_(index) {
     }
-    Child(Kind kind, std::vector<NodeIndex> indices) : kind_(kind), data_(std::move(indices)) {
+    Child(Kind kind, std::vector<NodeIndex> indices)
+        : kind_(kind), data_(std::move(indices)) {
     }
 };
 
@@ -226,7 +228,8 @@ class NodeBuilder {
         return *this;
     }
 
-    auto add_multiple_children(std::vector<NodeIndex> children) -> NodeBuilder& {
+    auto add_multiple_children(std::vector<NodeIndex> children)
+        -> NodeBuilder& {
         children_.push_back(Child::multiple(std::move(children)));
         return *this;
     }
@@ -287,8 +290,9 @@ class Ast {
             if (child.is_single()) {
                 child_indices.push_back(child.as_single());
             } else {
-                // Store multiple children: first the count, then the indices
-                NodeIndex len_index = children_.size();
+                // Store multiple children: first the count,
+                // then the indices
+                NodeIndex len_index  = children_.size();
                 const auto& multiple = child.as_multiple();
                 children_.push_back(multiple.size());
                 for (auto idx : multiple) {
@@ -298,11 +302,13 @@ class Ast {
             }
         }
 
-        NodeIndex node_index = nodes_.size();
+        NodeIndex node_index         = nodes_.size();
         NodeIndex children_start_pos = children_.size();
 
         // Add child indices to flattened storage
-        children_.insert(children_.end(), child_indices.begin(), child_indices.end());
+        children_.insert(children_.end(),
+                         child_indices.begin(),
+                         child_indices.end());
 
         // Add node data
         nodes_.push_back(builder.kind());
@@ -313,16 +319,19 @@ class Ast {
     }
 
     /// Get children of a node
-    auto get_children(NodeIndex node_index) const -> std::span<const NodeIndex> {
+    auto get_children(NodeIndex node_index) const
+        -> std::span<const NodeIndex> {
         if (node_index == 0 || node_index >= nodes_.size()) {
             return {};
         }
 
         usize start = children_start_[node_index];
-        usize end = (node_index + 1 < children_start_.size()) ? children_start_[node_index + 1]
-                                                              : children_.size();
+        usize end   = (node_index + 1 < children_start_.size())
+                          ? children_start_[node_index + 1]
+                          : children_.size();
 
-        return std::span<const NodeIndex>(children_.data() + start, end - start);
+        return std::span<const NodeIndex>(children_.data() + start,
+                                          end - start);
     }
 
     /// Get node kind
@@ -334,13 +343,15 @@ class Ast {
     }
 
     /// Get complete node information
-    auto get_node(NodeIndex node_index) const
-        -> std::optional<std::tuple<NodeKind, Span, std::span<const NodeIndex>>> {
+    auto get_node(NodeIndex node_index) const -> std::optional<
+        std::tuple<NodeKind, Span, std::span<const NodeIndex>>> {
         if (node_index == 0 || node_index >= nodes_.size()) {
             return std::nullopt;
         }
 
-        return std::make_tuple(nodes_[node_index], spans_[node_index], get_children(node_index));
+        return std::make_tuple(nodes_[node_index],
+                               spans_[node_index],
+                               get_children(node_index));
     }
 
     /// Get span of a node
@@ -359,9 +370,9 @@ class Ast {
         }
 
         usize slice_start = slice_len_index;
-        usize count = children_[slice_start];
-        usize data_start = slice_start + 1;
-        usize data_end = data_start + count;
+        usize count       = children_[slice_start];
+        usize data_start  = slice_start + 1;
+        usize data_end    = data_start + count;
 
         if (data_end > children_.size()) {
             return std::nullopt;

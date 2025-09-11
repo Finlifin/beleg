@@ -12,7 +12,7 @@
 #include <expected>
 
 // VFS 节点 ID 类型
-using VfsNodeId = u32;
+using VfsNodeId                         = u32;
 
 // 无效的 VFS 节点 ID
 constexpr VfsNodeId INVALID_VFS_NODE_ID = static_cast<VfsNodeId>(-1);
@@ -55,13 +55,15 @@ struct DirNode {
 struct FileNode {
     FileKind kind;
     std::optional<FileId> source_file_id;    // 惰性加载的源文件引用
-    std::optional<std::unique_ptr<Ast>> ast; // 惰性加载的完整 AST 树
+    std::optional<std::unique_ptr<Ast>> ast; // 惰性加载的完整
+                                             // AST 树
 
     FileNode(FileKind k) : kind(k) {
     }
 
     // 拷贝构造函数 - 不拷贝 AST（因为 unique_ptr 不能拷贝）
-    FileNode(const FileNode& other) : kind(other.kind), source_file_id(other.source_file_id) {
+    FileNode(const FileNode& other)
+        : kind(other.kind), source_file_id(other.source_file_id) {
         // 不拷贝 AST，保持为空
     }
 
@@ -74,7 +76,7 @@ struct FileNode {
     // 赋值操作符
     FileNode& operator=(const FileNode& other) {
         if (this != &other) {
-            kind = other.kind;
+            kind           = other.kind;
             source_file_id = other.source_file_id;
             // 不拷贝 AST
             ast.reset();
@@ -85,9 +87,9 @@ struct FileNode {
     // 移动赋值操作符
     FileNode& operator=(FileNode&& other) noexcept {
         if (this != &other) {
-            kind = std::move(other.kind);
+            kind           = std::move(other.kind);
             source_file_id = std::move(other.source_file_id);
-            ast = std::move(other.ast);
+            ast            = std::move(other.ast);
         }
         return *this;
     }
@@ -107,15 +109,18 @@ struct VfsNode {
 
     // 构造函数
     VfsNode(String name, VfsNodeId parent_id, DirKind dir_kind)
-        : type(VfsNodeType::Directory), name(std::move(name)), parent(parent_id), dir(dir_kind) {
+        : type(VfsNodeType::Directory), name(std::move(name)),
+          parent(parent_id), dir(dir_kind) {
     }
 
     VfsNode(String name, VfsNodeId parent_id, FileKind file_kind)
-        : type(VfsNodeType::File), name(std::move(name)), parent(parent_id), file(file_kind) {
+        : type(VfsNodeType::File), name(std::move(name)), parent(parent_id),
+          file(file_kind) {
     }
 
     VfsNode(String name, DirKind dir_kind) // 根节点构造函数
-        : type(VfsNodeType::Directory), name(std::move(name)), parent(std::nullopt), dir(dir_kind) {
+        : type(VfsNodeType::Directory), name(std::move(name)),
+          parent(std::nullopt), dir(dir_kind) {
     }
 
     // 析构函数
@@ -128,11 +133,13 @@ struct VfsNode {
     }
 
     // 拷贝构造函数
-    VfsNode(const VfsNode& other) : type(other.type), name(other.name), parent(other.parent) {
+    VfsNode(const VfsNode& other)
+        : type(other.type), name(other.name), parent(other.parent) {
         if (type == VfsNodeType::Directory) {
             new (&dir) DirNode(other.dir);
         } else {
-            new (&file) FileNode(other.file); // FileNode 现在有自己的拷贝构造函数
+            new (&file) FileNode(other.file); // FileNode
+                                              // 现在有自己的拷贝构造函数
         }
     }
 
@@ -142,7 +149,9 @@ struct VfsNode {
         if (type == VfsNodeType::Directory) {
             new (&dir) DirNode(std::move(other.dir));
         } else {
-            new (&file) FileNode(std::move(other.file)); // FileNode 现在有自己的移动构造函数
+            new (&file)
+                FileNode(std::move(other.file)); // FileNode
+                                                 // 现在有自己的移动构造函数
         }
     }
 
@@ -197,7 +206,8 @@ class Vfs {
     explicit Vfs(std::filesystem::path root_path);
 
     // 静态方法：从文件系统构建 VFS
-    static auto build_from_fs(std::string_view path) -> std::expected<Vfs, VfsError>;
+    static auto build_from_fs(std::string_view path)
+        -> std::expected<Vfs, VfsError>;
 
     // 获取根节点 ID
     auto root_node_id() const -> VfsNodeId {
@@ -209,13 +219,16 @@ class Vfs {
     auto get_node_mut(VfsNodeId node_id) -> std::optional<VfsNode*>;
 
     // 获取绝对路径
-    auto get_absolute_path(VfsNodeId node_id) const -> std::optional<std::filesystem::path>;
+    auto get_absolute_path(VfsNodeId node_id) const
+        -> std::optional<std::filesystem::path>;
 
     // 获取项目内路径
-    auto get_project_path(VfsNodeId node_id) const -> std::optional<std::filesystem::path>;
+    auto get_project_path(VfsNodeId node_id) const
+        -> std::optional<std::filesystem::path>;
 
     // 路径解析
-    auto resolve(const std::vector<std::string_view>& path) const -> std::optional<VfsNodeId>;
+    auto resolve(const std::vector<std::string_view>& path) const
+        -> std::optional<VfsNodeId>;
     auto resolve(std::string_view path) const -> std::optional<VfsNodeId>;
 
     // 获取文件的源文件 ID
@@ -231,32 +244,37 @@ class Vfs {
     auto set_ast(VfsNodeId node_id, std::unique_ptr<Ast> ast) -> bool;
 
     // 获取目录的入口文件
-    auto get_entry_file(VfsNodeId dir_node_id) const -> std::optional<VfsNodeId>;
+    auto get_entry_file(VfsNodeId dir_node_id) const
+        -> std::optional<VfsNodeId>;
 
     // 获取目录的子节点
-    auto get_children(VfsNodeId node_id) const -> std::optional<std::vector<VfsNodeId>>;
+    auto get_children(VfsNodeId node_id) const
+        -> std::optional<std::vector<VfsNodeId>>;
 
     // 检查是否为 Beleg 源文件
     static auto is_beleg_source_file(const std::filesystem::path& path) -> bool;
 
     // 获取文件类型
     static auto get_file_kind(const std::filesystem::path& path,
-                              const std::filesystem::path& relative_path) -> FileKind;
+                              const std::filesystem::path& relative_path)
+        -> FileKind;
 
     // 获取目录类型
     static auto get_dir_kind(const std::filesystem::path& path,
-                             const std::filesystem::path& relative_path) -> DirKind;
+                             const std::filesystem::path& relative_path)
+        -> DirKind;
 
   private:
     // 添加节点
     auto add_node(VfsNode node) -> VfsNodeId;
 
     // 构建路径到节点的映射
-    auto build_path_mapping(VfsNodeId node_id, const std::filesystem::path& current_path) -> void;
+    auto build_path_mapping(VfsNodeId node_id,
+                            const std::filesystem::path& current_path) -> void;
 
     // 递归扫描目录
-    auto scan_directory(const std::filesystem::path& dir_path, VfsNodeId parent_id)
-        -> std::expected<void, VfsError>;
+    auto scan_directory(const std::filesystem::path& dir_path,
+                        VfsNodeId parent_id) -> std::expected<void, VfsError>;
 };
 
 #endif // VFS_HH

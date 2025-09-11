@@ -30,10 +30,14 @@ class ParseError : public Issue {
 
   public:
     ParseError(Span span, String message, DiagLevel level = DiagLevel::Error)
-        : Issue(span, std::move(message), level), kind_(ParseErrorKind::InternalError) {
+        : Issue(span, std::move(message), level),
+          kind_(ParseErrorKind::InternalError) {
     }
 
-    ParseError(Span span, String message, ParseErrorKind kind, DiagLevel level = DiagLevel::Error)
+    ParseError(Span span,
+               String message,
+               ParseErrorKind kind,
+               DiagLevel level = DiagLevel::Error)
         : Issue(span, std::move(message), level), kind_(kind) {
     }
 
@@ -58,12 +62,12 @@ class ScopedGuard {
     ~ScopedGuard();
 
     // 禁用拷贝
-    ScopedGuard(const ScopedGuard&) = delete;
+    ScopedGuard(const ScopedGuard&)            = delete;
     ScopedGuard& operator=(const ScopedGuard&) = delete;
 
     // 允许移动
-    ScopedGuard(ScopedGuard&&) = default;
-    ScopedGuard& operator=(ScopedGuard&&) = default;
+    ScopedGuard(ScopedGuard&&)                 = default;
+    ScopedGuard& operator=(ScopedGuard&&)      = default;
 };
 
 // 手写 PEG 解析器
@@ -78,7 +82,9 @@ class Parser {
     std::vector<ParseError> errors_;
 
   public:
-    Parser(const SourceMap* source_map, std::vector<Token> tokens, u32 start_pos);
+    Parser(const SourceMap* source_map,
+           std::vector<Token> tokens,
+           u32 start_pos);
 
     // 主解析方法
     auto parse(DiagCtxt& diag_ctx) -> void;

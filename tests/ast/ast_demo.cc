@@ -38,8 +38,8 @@ auto main() -> int {
     auto add_info = ast.get_node(add_expr);
     if (add_info) {
         auto [kind, span, children] = *add_info;
-        std::cout << "   Addition node: kind=" << static_cast<u32>(kind) << ", span=[" << span.start
-                  << "," << span.end << "]"
+        std::cout << "   Addition node: kind=" << static_cast<u32>(kind)
+                  << ", span=[" << span.start << "," << span.end << "]"
                   << ", children=" << children.size() << "\n";
 
         for (usize i = 0; i < children.size(); ++i) {
@@ -55,11 +55,14 @@ auto main() -> int {
 
     // Parameters
     std::vector<NodeIndex> params;
-    params.push_back(ast.add_node(NodeBuilder(NodeKind::Id, Span(25, 26)))); // param a
-    params.push_back(ast.add_node(NodeBuilder(NodeKind::Id, Span(28, 29)))); // param b
+    params.push_back(
+        ast.add_node(NodeBuilder(NodeKind::Id, Span(25, 26)))); // param a
+    params.push_back(
+        ast.add_node(NodeBuilder(NodeKind::Id, Span(28, 29)))); // param b
 
     // Function body (simple return statement)
-    NodeIndex return_expr = ast.add_node(NodeBuilder(NodeKind::Add, Span(35, 39)));
+    NodeIndex return_expr
+        = ast.add_node(NodeBuilder(NodeKind::Add, Span(35, 39)));
     NodeBuilder return_builder(NodeKind::ReturnStatement, Span(32, 39));
     return_builder.add_single_child(return_expr);
     NodeIndex return_stmt = ast.add_node(return_builder);
@@ -78,15 +81,18 @@ auto main() -> int {
     auto func_info = ast.get_node(func_def);
     if (func_info) {
         auto [kind, span, children] = *func_info;
-        std::cout << "   Function has " << children.size() << " direct children\n";
+        std::cout << "   Function has " << children.size()
+                  << " direct children\n";
 
         // Access parameters (stored as multiple children)
         if (children.size() >= 2) {
             auto params_slice = ast.get_multi_child_slice(children[1]);
             if (params_slice) {
-                std::cout << "   Function has " << params_slice->size() << " parameters:\n";
+                std::cout << "   Function has " << params_slice->size()
+                          << " parameters:\n";
                 for (usize i = 0; i < params_slice->size(); ++i) {
-                    std::cout << "     Parameter " << i << ": node " << (*params_slice)[i] << "\n";
+                    std::cout << "     Parameter " << i << ": node "
+                              << (*params_slice)[i] << "\n";
                 }
             }
         }
@@ -94,10 +100,12 @@ auto main() -> int {
 
     // Demonstrate node type classification
     std::cout << "\n4. Node type classification:\n";
-    std::cout << "   NodeKind::Add -> " << static_cast<u32>(get_node_type(NodeKind::Add)) << "\n";
+    std::cout << "   NodeKind::Add -> "
+              << static_cast<u32>(get_node_type(NodeKind::Add)) << "\n";
     std::cout << "   NodeKind::FunctionDef -> "
               << static_cast<u32>(get_node_type(NodeKind::FunctionDef)) << "\n";
-    std::cout << "   NodeKind::Id -> " << static_cast<u32>(get_node_type(NodeKind::Id)) << "\n";
+    std::cout << "   NodeKind::Id -> "
+              << static_cast<u32>(get_node_type(NodeKind::Id)) << "\n";
 
     // Set root and show statistics
     ast.set_root(func_def);
@@ -105,7 +113,8 @@ auto main() -> int {
     std::cout << "\n5. AST Statistics:\n";
     std::cout << "   Total nodes: " << ast.nodes().size() << "\n";
     std::cout << "   Root node: " << ast.root() << "\n";
-    std::cout << "   Total children storage: " << ast.get_children(0).size() << " (flattened)\n";
+    std::cout << "   Total children storage: " << ast.get_children(0).size()
+              << " (flattened)\n";
 
     std::cout << "\nAST demo completed successfully!\n";
     return 0;

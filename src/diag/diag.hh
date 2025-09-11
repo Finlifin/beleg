@@ -43,11 +43,11 @@ struct Diag;
 /// 诊断上下文选项
 struct DiagCtxtOptions {
     /// 最大错误数，超过后停止编译
-    u32 max_errors = 100;
+    u32 max_errors            = 100;
     /// 最大警告数，超过后停止报告警告
-    u32 max_warnings = 1000;
+    u32 max_warnings          = 1000;
     /// 是否启用颜色输出
-    bool use_colors = true;
+    bool use_colors           = true;
     /// 是否在第一个错误后停止
     bool abort_on_first_error = false;
     /// 默认的额外上下文行数
@@ -58,21 +58,22 @@ struct DiagCtxtOptions {
 class DiagEmitter {
   public:
     virtual void emit(const Diag& diag) = 0;
-    virtual ~DiagEmitter() = default;
+    virtual ~DiagEmitter()              = default;
 };
 
 class TerminalEmitter : public DiagEmitter {};
 
 // 工厂函数声明
 auto create_terminal_emitter(std::ostream& output,
-                             bool use_colors = true,
-                             bool use_unicode = true,
-                             SourceMap* source_map = nullptr) -> std::unique_ptr<TerminalEmitter>;
+                             bool use_colors       = true,
+                             bool use_unicode      = true,
+                             SourceMap* source_map = nullptr)
+    -> std::unique_ptr<TerminalEmitter>;
 
 struct Label {
     Span span;
     String text;
-    DiagLevel level = DiagLevel::Error;
+    DiagLevel level       = DiagLevel::Error;
     u32 surrounding_lines = 1;
 };
 
@@ -91,11 +92,14 @@ class DiagBuilder {
     DiagCtxt* ctxt_;
 
   public:
-    DiagBuilder(DiagCtxt* ctxt, DiagLevel level, const String& message, const Span& span)
+    DiagBuilder(DiagCtxt* ctxt,
+                DiagLevel level,
+                const String& message,
+                const Span& span)
         : ctxt_(ctxt) {
-        diag_.level = level;
+        diag_.level           = level;
         diag_.primary_message = message;
-        diag_.primary_span = span;
+        diag_.primary_span    = span;
     }
 
     auto code(u32 error_code) -> DiagBuilder& {
@@ -103,8 +107,9 @@ class DiagBuilder {
         return *this;
     }
 
-    auto label(const Span& span, const String& text, DiagLevel level = DiagLevel::Error)
-        -> DiagBuilder& {
+    auto label(const Span& span,
+               const String& text,
+               DiagLevel level = DiagLevel::Error) -> DiagBuilder& {
         diag_.labels.push_back({span, text, level});
         return *this;
     }
@@ -128,8 +133,8 @@ class DiagCtxt {
     std::vector<std::unique_ptr<DiagEmitter>> emitters_;
     SourceMap* source_map_ = nullptr;
 
-    u32 error_count_ = 0;
-    u32 warning_count_ = 0;
+    u32 error_count_       = 0;
+    u32 warning_count_     = 0;
 
   public:
     DiagCtxt() = default;
@@ -154,8 +159,9 @@ class DiagCtxt {
         return warning_count_;
     }
 
-    auto diag_builder(DiagLevel level, const String& primary_message, const Span& primary_span)
-        -> DiagBuilder {
+    auto diag_builder(DiagLevel level,
+                      const String& primary_message,
+                      const Span& primary_span) -> DiagBuilder {
         return DiagBuilder(this, level, primary_message, primary_span);
     }
 };

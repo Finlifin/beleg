@@ -17,12 +17,12 @@ struct AsciiChars {
 
 /// 终端颜色和样式
 struct TerminalStyle {
-    static constexpr const char* RESET = "\x1b[0m";
+    static constexpr const char* RESET         = "\x1b[0m";
 
     // 颜色定义
-    static constexpr const char* BRIGHT_RED = "\x1b[91m";
+    static constexpr const char* BRIGHT_RED    = "\x1b[91m";
     static constexpr const char* BRIGHT_YELLOW = "\x1b[93m";
-    static constexpr const char* BRIGHT_BLUE = "\x1b[94m";
+    static constexpr const char* BRIGHT_BLUE   = "\x1b[94m";
 
     /// 根据诊断级别获取样式
     static const char* get_style(DiagLevel level, bool use_colors) {
@@ -98,11 +98,12 @@ class TerminalEmitterImpl : public TerminalEmitter {
 
         // [4002] error: Unresolved identifier: `Student`
         if (diag.error_code) {
-            output_ << style << "[" << *diag.error_code << "] " << get_level_string(diag.level)
-                    << ": " << diag.primary_message << reset << "\n";
+            output_ << style << "[" << *diag.error_code << "] "
+                    << get_level_string(diag.level) << ": "
+                    << diag.primary_message << reset << "\n";
         } else {
-            output_ << style << get_level_string(diag.level) << ": " << diag.primary_message
-                    << reset << "\n";
+            output_ << style << get_level_string(diag.level) << ": "
+                    << diag.primary_message << reset << "\n";
         }
     }
 
@@ -110,9 +111,11 @@ class TerminalEmitterImpl : public TerminalEmitter {
     auto render_labels(const Diag& diag) -> void {
         // 复制标签并按Span位置排序
         std::vector<Label> sorted_labels = diag.labels;
-        std::sort(sorted_labels.begin(), sorted_labels.end(), [](const Label& a, const Label& b) {
-            return a.span.start < b.span.start;
-        });
+        std::sort(sorted_labels.begin(),
+                  sorted_labels.end(),
+                  [](const Label& a, const Label& b) {
+                      return a.span.start < b.span.start;
+                  });
 
         for (size_t i = 0; i < sorted_labels.size(); ++i) {
             render_label(sorted_labels[i], i == 0);
@@ -133,13 +136,14 @@ class TerminalEmitterImpl : public TerminalEmitter {
             return;
 
         // 计算需要显示的行范围
-        u32 start_line = (location->line > label.surrounding_lines)
-                             ? location->line - label.surrounding_lines
-                             : 1;
+        u32 start_line     = (location->line > label.surrounding_lines)
+                                 ? location->line - label.surrounding_lines
+                                 : 1;
 
-        auto end_location = source_map_->lookup_location(label.span.end);
-        u32 end_line = end_location ? end_location->line + label.surrounding_lines
-                                    : location->line + label.surrounding_lines;
+        auto end_location  = source_map_->lookup_location(label.span.end);
+        u32 end_line       = end_location
+                                 ? end_location->line + label.surrounding_lines
+                                 : location->line + label.surrounding_lines;
 
         // 计算最大行号的宽度，用于对齐
         u32 max_line_width = static_cast<u32>(std::log10(end_line)) + 1;
@@ -149,11 +153,13 @@ class TerminalEmitterImpl : public TerminalEmitter {
             std::string line_spaces(max_line_width, ' ');
 
             if (use_unicode_) {
-                output_ << " " << line_spaces << " ╭─[ " << source_file->name << ":"
-                        << location->line << ":" << (location->column + 1) << " ]\n";
+                output_ << " " << line_spaces << " ╭─[ " << source_file->name
+                        << ":" << location->line << ":"
+                        << (location->column + 1) << " ]\n";
             } else {
-                output_ << " " << line_spaces << " +--[ " << source_file->name << ":"
-                        << location->line << ":" << (location->column + 1) << " ]\n";
+                output_ << " " << line_spaces << " +--[ " << source_file->name
+                        << ":" << location->line << ":"
+                        << (location->column + 1) << " ]\n";
             }
 
             // 分隔行
@@ -161,11 +167,16 @@ class TerminalEmitterImpl : public TerminalEmitter {
         }
 
         // 渲染每一行
-        for (u32 current_line = start_line; current_line <= end_line; ++current_line) {
+        for (u32 current_line = start_line; current_line <= end_line;
+             ++current_line) {
             auto line_content = source_file->get_line(current_line);
             if (line_content) {
-                render_source_line_with_width(
-                    current_line, *line_content, label, *location, end_location, max_line_width);
+                render_source_line_with_width(current_line,
+                                              *line_content,
+                                              label,
+                                              *location,
+                                              end_location,
+                                              max_line_width);
             }
         }
 
@@ -198,7 +209,8 @@ class TerminalEmitterImpl : public TerminalEmitter {
         const char* line_prefix = use_unicode_ ? " │ " : " | ";
 
         // 格式化行号，右对齐以保持统一宽度
-        output_ << " " << std::setw(line_width) << line_num << line_prefix << line_text << "\n";
+        output_ << " " << std::setw(line_width) << line_num << line_prefix
+                << line_text << "\n";
 
         // 如果是错误行，渲染下划线和指针
         if (line_num == start_loc.line) {
@@ -226,16 +238,19 @@ class TerminalEmitterImpl : public TerminalEmitter {
         }
 
         // 渲染下划线
-        const char* underline_char = use_unicode_ ? UnicodeChars::UNDERLINE : AsciiChars::UNDERLINE;
-        const char* pointer_char = use_unicode_ ? UnicodeChars::UNDERLINE : AsciiChars::UNDERLINE;
+        const char* underline_char
+            = use_unicode_ ? UnicodeChars::UNDERLINE : AsciiChars::UNDERLINE;
+        const char* pointer_char
+            = use_unicode_ ? UnicodeChars::UNDERLINE : AsciiChars::UNDERLINE;
 
         output_ << style;
 
         // 计算下划线长度
         u32 span_len = 1; // 默认长度
         if (end_loc && start_loc.line == end_loc->line) {
-            span_len =
-                (end_loc->column > start_loc.column) ? end_loc->column - start_loc.column : 1;
+            span_len = (end_loc->column > start_loc.column)
+                           ? end_loc->column - start_loc.column
+                           : 1;
         }
 
         if (span_len == 0) {
@@ -266,7 +281,8 @@ class TerminalEmitterImpl : public TerminalEmitter {
 
     /// 渲染备注
     auto render_notes(const Diag& diag) -> void {
-        const char* style = TerminalStyle::get_style(DiagLevel::Note, use_colors_);
+        const char* style
+            = TerminalStyle::get_style(DiagLevel::Note, use_colors_);
         const char* reset = use_colors_ ? TerminalStyle::RESET : "";
 
         for (const auto& note : diag.notes) {
@@ -279,8 +295,11 @@ class TerminalEmitterImpl : public TerminalEmitter {
 auto create_terminal_emitter(std::ostream& output,
                              bool use_colors,
                              bool use_unicode,
-                             SourceMap* source_map) -> std::unique_ptr<TerminalEmitter> {
-    auto emitter =
-        std::make_unique<TerminalEmitterImpl>(output, use_colors, use_unicode, source_map);
+                             SourceMap* source_map)
+    -> std::unique_ptr<TerminalEmitter> {
+    auto emitter = std::make_unique<TerminalEmitterImpl>(output,
+                                                         use_colors,
+                                                         use_unicode,
+                                                         source_map);
     return emitter;
 }

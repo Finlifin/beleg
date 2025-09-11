@@ -26,7 +26,8 @@ class VfsTest : public ::testing::Test {
         create_file(test_dir / "src" / "main.bl", "fn main() {}\n");
         create_file(test_dir / "src" / "lib.bl", "pub fn hello() {}\n");
         create_file(test_dir / "src" / "utils" / "mod.bl", "pub mod helper;\n");
-        create_file(test_dir / "src" / "utils" / "helper.bl", "pub fn help() {}\n");
+        create_file(test_dir / "src" / "utils" / "helper.bl",
+                    "pub fn help() {}\n");
         create_file(test_dir / "examples" / "example1.bl", "use lib::hello;\n");
         create_file(test_dir / "README.md", "# Test Project\n");
     }
@@ -45,9 +46,10 @@ class VfsTest : public ::testing::Test {
 
 TEST_F(VfsTest, BuildFromFs) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
-    ASSERT_TRUE(vfs_result.has_value()) << "Failed to build VFS from filesystem";
+    ASSERT_TRUE(vfs_result.has_value())
+        << "Failed to build VFS from filesystem";
 
-    auto& vfs = vfs_result.value();
+    auto& vfs    = vfs_result.value();
 
     // 测试根节点
     auto root_id = vfs.root_node_id();
@@ -63,7 +65,7 @@ TEST_F(VfsTest, PathResolution) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(vfs_result.has_value());
 
-    auto& vfs = vfs_result.value();
+    auto& vfs   = vfs_result.value();
 
     // 测试路径解析
     auto src_id = vfs.resolve("src");
@@ -98,7 +100,7 @@ TEST_F(VfsTest, FileKindDetection) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(vfs_result.has_value());
 
-    auto& vfs = vfs_result.value();
+    auto& vfs       = vfs_result.value();
 
     // 测试 package.toml
     auto package_id = vfs.resolve("package.toml");
@@ -140,7 +142,7 @@ TEST_F(VfsTest, DirKindDetection) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(vfs_result.has_value());
 
-    auto& vfs = vfs_result.value();
+    auto& vfs   = vfs_result.value();
 
     // 测试 src 目录
     auto src_id = vfs.resolve("src");
@@ -182,7 +184,7 @@ TEST_F(VfsTest, PathGeneration) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(vfs_result.has_value());
 
-    auto& vfs = vfs_result.value();
+    auto& vfs    = vfs_result.value();
 
     // 测试绝对路径生成
     auto main_id = vfs.resolve("src/main.bl");
@@ -202,7 +204,7 @@ TEST_F(VfsTest, Children) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(vfs_result.has_value());
 
-    auto& vfs = vfs_result.value();
+    auto& vfs   = vfs_result.value();
 
     // 测试获取子节点
     auto src_id = vfs.resolve("src");
@@ -210,7 +212,8 @@ TEST_F(VfsTest, Children) {
 
     auto children = vfs.get_children(*src_id);
     ASSERT_TRUE(children.has_value());
-    EXPECT_GE(children->size(), 3); // 至少包含 main.bl, lib.bl, utils/
+    EXPECT_GE(children->size(),
+              3); // 至少包含 main.bl, lib.bl, utils/
 
     // 验证子节点名称
     std::vector<String> child_names;
@@ -220,16 +223,19 @@ TEST_F(VfsTest, Children) {
         child_names.push_back((*child_node)->name);
     }
 
-    EXPECT_TRUE(std::find(child_names.begin(), child_names.end(), "main.bl") != child_names.end());
-    EXPECT_TRUE(std::find(child_names.begin(), child_names.end(), "lib.bl") != child_names.end());
-    EXPECT_TRUE(std::find(child_names.begin(), child_names.end(), "utils") != child_names.end());
+    EXPECT_TRUE(std::find(child_names.begin(), child_names.end(), "main.bl")
+                != child_names.end());
+    EXPECT_TRUE(std::find(child_names.begin(), child_names.end(), "lib.bl")
+                != child_names.end());
+    EXPECT_TRUE(std::find(child_names.begin(), child_names.end(), "utils")
+                != child_names.end());
 }
 
 TEST_F(VfsTest, SourceFileAndAstManagement) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(vfs_result.has_value());
 
-    auto& vfs = vfs_result.value();
+    auto& vfs    = vfs_result.value();
 
     auto main_id = vfs.resolve("src/main.bl");
     ASSERT_TRUE(main_id.has_value());
@@ -246,7 +252,7 @@ TEST_F(VfsTest, SourceFileAndAstManagement) {
     EXPECT_EQ(retrieved_file_id->id, 42);
 
     // 创建并设置 AST
-    auto ast = std::make_unique<Ast>();
+    auto ast            = std::make_unique<Ast>();
     NodeIndex root_node = ast->add_node(NodeBuilder(NodeKind::Int, Span(0, 1)));
     ast->set_root(root_node);
 
@@ -260,7 +266,7 @@ TEST_F(VfsTest, GetEntryFile) {
     auto vfs_result = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(vfs_result.has_value());
 
-    auto& vfs = vfs_result.value();
+    auto& vfs   = vfs_result.value();
 
     // 测试 src 目录的入口文件（应该是 main.bl）
     auto src_id = vfs.resolve("src");
@@ -305,7 +311,7 @@ TEST_F(VfsTest, ErrorHandling) {
     auto valid_vfs = Vfs::build_from_fs(test_dir.string());
     ASSERT_TRUE(valid_vfs.has_value());
 
-    auto& vfs = valid_vfs.value();
+    auto& vfs       = valid_vfs.value();
 
     // 测试不存在的路径解析
     auto invalid_id = vfs.resolve("nonexistent/path");

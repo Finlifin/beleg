@@ -72,12 +72,14 @@ TEST_F(SourceMapTest, BytePosToLocation) {
     EXPECT_EQ(loc0.line, 1u);
     EXPECT_EQ(loc0.column, 0u);
 
-    // Position 6 should be line 2, column 0 (after "hello\n")
+    // Position 6 should be line 2, column 0 (after
+    // "hello\n")
     Location loc6 = file.byte_pos_to_location(6, file_id);
     EXPECT_EQ(loc6.line, 2u);
     EXPECT_EQ(loc6.column, 0u);
 
-    // Position 12 should be line 3, column 0 (after "hello\nworld\n")
+    // Position 12 should be line 3, column 0 (after
+    // "hello\nworld\n")
     Location loc12 = file.byte_pos_to_location(12, file_id);
     EXPECT_EQ(loc12.line, 3u);
     EXPECT_EQ(loc12.column, 0u);
@@ -135,21 +137,28 @@ TEST_F(SourceMapTest, SourceMapFileManagement) {
 TEST_F(SourceMapTest, GlobalPositionLookup) {
     SourceMap source_map;
 
-    FileId id1 = source_map.add_file("file1.txt", "hello\nworld"); // 11 bytes: "hello\nworld"
-    FileId id2 = source_map.add_file("file2.txt", "test\ncode");   // 9 bytes: "test\ncode"
+    FileId id1 = source_map.add_file("file1.txt",
+                                     "hello\nworld"); // 11 bytes:
+                                                      // "hello\nworld"
+    FileId id2 = source_map.add_file("file2.txt",
+                                     "test\ncode"); // 9 bytes:
+                                                    // "test\ncode"
 
     // Position in first file
-    auto loc5 = source_map.lookup_location(5);
+    auto loc5  = source_map.lookup_location(5);
     ASSERT_TRUE(loc5.has_value());
     EXPECT_EQ(loc5->file, id1);
     EXPECT_EQ(loc5->line, 1u);
     EXPECT_EQ(loc5->column, 5u);
 
-    // Position in second file (global position 11 + 4 = 15 = position 4 in second file)
-    auto loc15 = source_map.lookup_location(15); // 11 + 4 = position 4 in "test\ncode"
+    // Position in second file (global position 11 + 4 = 15
+    // = position 4 in second file)
+    auto loc15
+        = source_map.lookup_location(15); // 11 + 4 = position 4 in "test\ncode"
     ASSERT_TRUE(loc15.has_value());
     EXPECT_EQ(loc15->file, id2);
-    // Position 4 in "test\ncode" is the newline character, so line 1, column 4
+    // Position 4 in "test\ncode" is the newline character,
+    // so line 1, column 4
     EXPECT_EQ(loc15->line, 1u);
     EXPECT_EQ(loc15->column, 4u);
 } // Test span text extraction
@@ -164,7 +173,8 @@ TEST_F(SourceMapTest, SpanTextExtraction) {
     ASSERT_TRUE(text.has_value());
     EXPECT_EQ(*text, "world");
 
-    // Extract across lines - "world\ntest" (positions 6-16, not 6-17)
+    // Extract across lines - "world\ntest" (positions 6-16,
+    // not 6-17)
     Span multiline_span(6, 16);
     auto multiline_text = source_map.get_span_text(multiline_span);
     ASSERT_TRUE(multiline_text.has_value());
@@ -179,7 +189,9 @@ TEST_F(SourceMapTest, LocationFormatting) {
     Location loc(id, 2, 3);
 
     std::string formatted = source_map.format_location(loc);
-    EXPECT_EQ(formatted, "example.txt:2:4"); // Column is 1-based in display
+    EXPECT_EQ(formatted,
+              "example.txt:2:4"); // Column is 1-based in
+                                  // display
 }
 
 // Test span creation from line/column
@@ -188,7 +200,8 @@ TEST_F(SourceMapTest, SpanCreation) {
 
     FileId id = source_map.add_file("test.txt", "hello\nworld\ntest");
 
-    // Create span from line 1 col 1 to line 1 col 5 (should cover "ello")
+    // Create span from line 1 col 1 to line 1 col 5 (should
+    // cover "ello")
     Span span = source_map.make_span(id, 1, 1, 1, 5);
 
     auto text = source_map.get_span_text(span);
@@ -243,17 +256,20 @@ TEST_F(SourceMapTest, LoadFile) {
     EXPECT_EQ(file->name, "../tests/source_map/test_source.txt");
     EXPECT_FALSE(file->content.empty());
 
-    // Test that file_id_map works correctly - loading the same file should return same ID
+    // Test that file_id_map works correctly - loading the
+    // same file should return same ID
     auto file_id2 = source_map.load_file("../tests/source_map/test_source.txt");
     ASSERT_TRUE(file_id2.has_value());
     EXPECT_EQ(*file_id, *file_id2);
 
     // Test loading non-existent file
-    auto nonexistent = source_map.load_file("../tests/source_map/nonexistent.txt");
+    auto nonexistent
+        = source_map.load_file("../tests/source_map/nonexistent.txt");
     EXPECT_FALSE(nonexistent.has_value());
 
     // Test that get_file_id works with loaded files
-    auto found_id = source_map.get_file_id("../tests/source_map/test_source.txt");
+    auto found_id
+        = source_map.get_file_id("../tests/source_map/test_source.txt");
     ASSERT_TRUE(found_id.has_value());
     EXPECT_EQ(*found_id, *file_id);
 }

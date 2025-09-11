@@ -12,13 +12,18 @@ ScopedGuard::~ScopedGuard() {
 // ParseError 实现
 void ParseError::emit(DiagCtxt& diag_ctx) const {
     // 使用诊断上下文创建诊断信息
-    auto builder = diag_ctx.diag_builder(level(), message(), span());
+    auto builder = diag_ctx.diag_builder(level(), message(), span())
+                       .label(span(), message());
+
     builder.emit();
 }
 
 // Parser 实现
-Parser::Parser(const SourceMap* source_map, std::vector<Token> tokens, u32 start_pos)
-    : source_map_(source_map), tokens_(std::move(tokens)), cursor_(0), start_pos_(start_pos) {
+Parser::Parser(const SourceMap* source_map,
+               std::vector<Token> tokens,
+               u32 start_pos)
+    : source_map_(source_map), tokens_(std::move(tokens)), cursor_(0),
+      start_pos_(start_pos) {
     enter(); // 初始化游标栈
 }
 
@@ -87,60 +92,62 @@ auto Parser::eat_tokens(usize amount) -> void {
 
 auto Parser::next_token() -> Token {
     if (cursor_ >= tokens_.size()) {
-        return Token{TokenKind::Eof, 0, 0};
+        return Token(TokenKind::Eof, 0, 0);
     }
     return tokens_[cursor_++];
 }
 
 auto Parser::peek_next_token() const -> Token {
     if (cursor_ >= tokens_.size()) {
-        return Token{TokenKind::Eof, 0, 0};
+        return Token(TokenKind::Eof, 0, 0);
     }
     return tokens_[cursor_];
 }
 
 auto Parser::current_token() const -> Token {
     if (cursor_ == 0 || cursor_ > tokens_.size()) {
-        return Token{TokenKind::Sof, 0, 0};
+        return Token(TokenKind::Sof, 0, 0);
     }
     return tokens_[cursor_ - 1];
 }
 
 auto Parser::get_token(usize index) const -> Token {
     if (index >= tokens_.size()) {
-        return Token{TokenKind::Eof, 0, 0};
+        return Token(TokenKind::Eof, 0, 0);
     }
     return tokens_[index];
 }
 
 auto Parser::previous_token() const -> Token {
     if (cursor_ == 0) {
-        return Token{TokenKind::Sof, 0, 0};
+        return Token(TokenKind::Sof, 0, 0);
     }
     return tokens_[cursor_ - 1];
 }
 
 auto Parser::current_span() const -> Span {
     if (cursor_stack_.empty()) {
-        return Span{0, 0}; // 返回空跨度
+        return Span(0,
+                    0); // 返回空跨度
     }
 
-    usize start = cursor_stack_.back();
-    usize end = cursor_;
+    usize start   = cursor_stack_.back();
+    usize end     = cursor_;
 
     u32 start_pos = (start < tokens_.size()) ? tokens_[start].start : 0;
-    u32 end_pos = (end < tokens_.size() && end > 0) ? tokens_[end - 1].end : start_pos;
+    u32 end_pos
+        = (end < tokens_.size() && end > 0) ? tokens_[end - 1].end : start_pos;
 
-    return Span{start_pos, end_pos};
+    return Span(start_pos, end_pos).with_offset(start_pos_);
 }
 
 auto Parser::next_token_span() const -> Span {
     if (cursor_ >= tokens_.size()) {
-        return Span{0, 0};
+        return Span(0, 0);
     }
 
     const auto& token = tokens_[cursor_];
-    return Span{token.start, token.end};
+    return Span(token.start, token.end).with_offset(start_pos_);
 }
 
 auto Parser::current_degree() const -> usize {
@@ -149,7 +156,8 @@ auto Parser::current_degree() const -> usize {
 
 // 解析方法实现（基础框架）
 auto Parser::try_file_scope() -> ParseResult {
-    // 使用 RAII 守卫自动管理游标栈
+    // 使用 RAII
+    // 守卫自动管理游标栈
     auto guard = scoped_guard();
 
     // 创建文件作用域节点

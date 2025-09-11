@@ -20,7 +20,8 @@ int main() {
 
     std::cout << "\n1. Basic Error Diagnostic:" << std::endl;
     {
-        auto emitter = create_terminal_emitter(std::cout, true, true, &source_map);
+        auto emitter
+            = create_terminal_emitter(std::cout, true, true, &source_map);
         auto ctxt = DiagCtxt(DiagCtxtOptions{}, &source_map);
         ctxt.add_emitter(std::move(emitter));
 
@@ -28,7 +29,8 @@ int main() {
         ctxt.diag_builder(DiagLevel::Error, "undefined variable", error_span)
             .code(4002)
             .label(error_span, "not found in this scope")
-            .note("perhaps you meant to declare this variable?")
+            .note("perhaps you meant to declare this "
+                  "variable?")
             .emit();
     }
 

@@ -2,8 +2,8 @@
 
 auto lexeme(TokenKind kind) -> std::string_view {
 
-#define CASE(kind, lex)                                                                            \
-    case TokenKind::kind:                                                                          \
+#define CASE(kind, lex)                                                        \
+    case TokenKind::kind:                                                      \
         return lex;
 
     switch (kind) {
@@ -122,9 +122,9 @@ auto Lexer::next() -> Token {
 
     Token token = Token(TokenKind::Invalid, cursor, cursor);
     switch (*ch) {
-#define SINGLE_TOKEN(kind, char)                                                                   \
-    case char:                                                                                     \
-        token = Token(TokenKind::kind, cursor, cursor + 1);                                        \
+#define SINGLE_TOKEN(kind, char)                                               \
+    case char:                                                                 \
+        token = Token(TokenKind::kind, cursor, cursor + 1);                    \
         break;
 
         SINGLE_TOKEN(Dot, '.')
@@ -256,13 +256,14 @@ auto Lexer::peek(std::string_view str) -> bool {
 
 auto Lexer::recognize_identifier() -> Token {
     u32 start = cursor;
-    while (cursor < src.size() && (std::isalnum(src[cursor]) || src[cursor] == '_')) {
+    while (cursor < src.size()
+           && (std::isalnum(src[cursor]) || src[cursor] == '_')) {
         cursor++;
     }
-    u32 end = cursor;
+    u32 end                = cursor;
 
     std::string_view ident = src.substr(start, end - start);
-    auto keyword = is_keyword(ident);
+    auto keyword           = is_keyword(ident);
     if (keyword.has_value()) {
         return Token(keyword.value(), start, end);
     }
@@ -292,28 +293,30 @@ auto Lexer::recognize_number() -> Token {
     u32 start = cursor;
 
     // Handle binary numbers (0b...)
-    if (src[cursor] == '0' && cursor + 1 < src.size() &&
-        (src[cursor + 1] == 'b' || src[cursor + 1] == 'B')) {
+    if (src[cursor] == '0' && cursor + 1 < src.size()
+        && (src[cursor + 1] == 'b' || src[cursor + 1] == 'B')) {
         cursor += 2; // Skip "0b"
-        while (cursor < src.size() && (src[cursor] == '0' || src[cursor] == '1')) {
+        while (cursor < src.size()
+               && (src[cursor] == '0' || src[cursor] == '1')) {
             cursor++;
         }
         return Token(TokenKind::IntBin, start, cursor);
     }
 
     // Handle octal numbers (0o...)
-    if (src[cursor] == '0' && cursor + 1 < src.size() &&
-        (src[cursor + 1] == 'o' || src[cursor + 1] == 'O')) {
+    if (src[cursor] == '0' && cursor + 1 < src.size()
+        && (src[cursor + 1] == 'o' || src[cursor + 1] == 'O')) {
         cursor += 2; // Skip "0o"
-        while (cursor < src.size() && src[cursor] >= '0' && src[cursor] <= '7') {
+        while (cursor < src.size() && src[cursor] >= '0'
+               && src[cursor] <= '7') {
             cursor++;
         }
         return Token(TokenKind::IntOct, start, cursor);
     }
 
     // Handle hexadecimal numbers (0x...)
-    if (src[cursor] == '0' && cursor + 1 < src.size() &&
-        (src[cursor + 1] == 'x' || src[cursor + 1] == 'X')) {
+    if (src[cursor] == '0' && cursor + 1 < src.size()
+        && (src[cursor + 1] == 'x' || src[cursor + 1] == 'X')) {
         cursor += 2; // Skip "0x"
         while (cursor < src.size() && std::isxdigit(src[cursor])) {
             cursor++;
@@ -336,7 +339,8 @@ auto Lexer::recognize_number() -> Token {
         // Check for scientific notation
         if (cursor < src.size() && (src[cursor] == 'e' || src[cursor] == 'E')) {
             cursor++; // Skip 'e' or 'E'
-            if (cursor < src.size() && (src[cursor] == '+' || src[cursor] == '-')) {
+            if (cursor < src.size()
+                && (src[cursor] == '+' || src[cursor] == '-')) {
                 cursor++; // Skip sign
             }
             while (cursor < src.size() && std::isdigit(src[cursor])) {
@@ -368,24 +372,28 @@ auto Lexer::recognize_char() -> Token {
 }
 
 /**
- * @brief Checks if a given identifier is a language keyword.
+ * @brief Checks if a given identifier is a language
+ * keyword.
  *
- * This function takes a string view and determines if it matches any of the
- * reserved keywords in the language.
+ * This function takes a string view and determines if it
+ * matches any of the reserved keywords in the language.
  *
- * @note The current implementation uses a linear series of string comparisons,
- * which has a time complexity proportional to the number of keywords. For
- * better performance, this could be optimized by using a more efficient lookup
- * structure, such as a static `std::unordered_map` or a perfect hash function,
- * to achieve constant-time average complexity.
+ * @note The current implementation uses a linear series of
+ * string comparisons, which has a time complexity
+ * proportional to the number of keywords. For better
+ * performance, this could be optimized by using a more
+ * efficient lookup structure, such as a static
+ * `std::unordered_map` or a perfect hash function, to
+ * achieve constant-time average complexity.
  *
  * @param ident The identifier string to check.
- * @return An optional containing the corresponding TokenKind if the identifier is a
- *         keyword, otherwise std::nullopt.
+ * @return An optional containing the corresponding
+ * TokenKind if the identifier is a keyword, otherwise
+ * std::nullopt.
  */
 auto Lexer::is_keyword(std::string_view ident) -> std::optional<TokenKind> {
-#define KEYWORD(keyword, kind)                                                                     \
-    if (ident == #keyword)                                                                         \
+#define KEYWORD(keyword, kind)                                                 \
+    if (ident == #keyword)                                                     \
         return TokenKind::kind;
 
     KEYWORD(and, And)

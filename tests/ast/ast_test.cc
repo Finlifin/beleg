@@ -55,7 +55,8 @@ TEST_F(ASTTest, NodeWithChildren) {
 
     // Create child nodes first
     NodeIndex left_child = ast.add_node(NodeBuilder(NodeKind::Int, Span(0, 1)));
-    NodeIndex right_child = ast.add_node(NodeBuilder(NodeKind::Int, Span(2, 3)));
+    NodeIndex right_child
+        = ast.add_node(NodeBuilder(NodeKind::Int, Span(2, 3)));
 
     // Create parent node with children
     NodeBuilder parent_builder(NodeKind::Add, Span(0, 3));
@@ -65,7 +66,7 @@ TEST_F(ASTTest, NodeWithChildren) {
     NodeIndex parent_node = ast.add_node(parent_builder);
 
     // Test parent node
-    auto parent_info = ast.get_node(parent_node);
+    auto parent_info      = ast.get_node(parent_node);
     ASSERT_TRUE(parent_info.has_value());
 
     auto [kind, span, children] = *parent_info;
@@ -93,12 +94,13 @@ TEST_F(ASTTest, MultipleChildren) {
     NodeIndex func_node = ast.add_node(func_builder);
 
     // Test function node
-    auto func_info = ast.get_node(func_node);
+    auto func_info      = ast.get_node(func_node);
     ASSERT_TRUE(func_info.has_value());
 
     auto [kind, span, children] = *func_info;
     EXPECT_EQ(kind, NodeKind::FunctionDef);
-    EXPECT_EQ(children.size(), 2u); // name + params reference
+    EXPECT_EQ(children.size(),
+              2u); // name + params reference
 
     // Test parameter access
     auto params_slice = ast.get_multi_child_slice(children[1]);
@@ -114,7 +116,8 @@ TEST_F(ASTTest, NodeTypeClassification) {
     EXPECT_EQ(get_node_type(NodeKind::Id), NodeType::NoChild);
     EXPECT_EQ(get_node_type(NodeKind::Add), NodeType::DoubleChildren);
     EXPECT_EQ(get_node_type(NodeKind::Call), NodeType::SingleWithMultiChildren);
-    EXPECT_EQ(get_node_type(NodeKind::FunctionDef), NodeType::FunctionDefChildren);
+    EXPECT_EQ(get_node_type(NodeKind::FunctionDef),
+              NodeType::FunctionDefChildren);
     EXPECT_EQ(get_node_type(NodeKind::Block), NodeType::MultiChildren);
 }
 
@@ -140,7 +143,7 @@ TEST_F(ASTTest, ChildOperations) {
     EXPECT_EQ(single_child.as_single(), 42u);
 
     std::vector<NodeIndex> multiple_indices = {1, 2, 3};
-    Child multiple_child = Child::multiple(multiple_indices);
+    Child multiple_child                    = Child::multiple(multiple_indices);
     EXPECT_FALSE(multiple_child.is_single());
     EXPECT_TRUE(multiple_child.is_multiple());
 
@@ -186,7 +189,8 @@ TEST_F(ASTTest, RootNodeManagement) {
 
     EXPECT_EQ(ast.root(), 0u);
 
-    NodeIndex root_node = ast.add_node(NodeBuilder(NodeKind::FileScope, Span(0, 100)));
+    NodeIndex root_node
+        = ast.add_node(NodeBuilder(NodeKind::FileScope, Span(0, 100)));
     ast.set_root(root_node);
 
     EXPECT_EQ(ast.root(), root_node);
@@ -210,4 +214,5 @@ TEST_F(ASTTest, AnotherTestCase) {
     EXPECT_EQ(1, 1); // Placeholder test
 }
 
-// Main function is provided by gtest_main_dep, so no need to define it
+// Main function is provided by gtest_main_dep, so no need
+// to define it

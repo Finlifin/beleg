@@ -22,15 +22,19 @@ TEST_F(ParseTest, ParseErrorKindTest) {
     Span test_span{5, 10};
 
     // 测试不同的错误种类
-    ParseError unexpected_token_error(
-        test_span, "Unexpected token", ParseErrorKind::UnexpectedToken);
+    ParseError unexpected_token_error(test_span,
+                                      "Unexpected token",
+                                      ParseErrorKind::UnexpectedToken);
     EXPECT_EQ(unexpected_token_error.kind(), ParseErrorKind::UnexpectedToken);
 
-    ParseError missing_paren_error(
-        test_span, "Missing parenthesis", ParseErrorKind::MissingParenthesis);
+    ParseError missing_paren_error(test_span,
+                                   "Missing parenthesis",
+                                   ParseErrorKind::MissingParenthesis);
     EXPECT_EQ(missing_paren_error.kind(), ParseErrorKind::MissingParenthesis);
 
-    ParseError eof_error(test_span, "Unexpected end of file", ParseErrorKind::UnexpectedEof);
+    ParseError eof_error(test_span,
+                         "Unexpected end of file",
+                         ParseErrorKind::UnexpectedEof);
     EXPECT_EQ(eof_error.kind(), ParseErrorKind::UnexpectedEof);
 
     // 测试默认构造函数使用 InternalError
@@ -115,15 +119,18 @@ TEST_F(ParseTest, ScopedGuardUsageExample) {
 
         // 解析函数名
         if (parser.peek_next_token().kind != TokenKind::Id) {
-            return std::unexpected(ParseError{
-                parser.current_span(), "Expected function name", ParseErrorKind::ExpectedToken});
+            return std::unexpected(ParseError{parser.current_span(),
+                                              "Expected function name",
+                                              ParseErrorKind::ExpectedToken});
         }
         parser.next_token();
 
         // 解析参数列表
         if (!parser.eat_token(TokenKind::LParen)) {
-            return std::unexpected(ParseError{
-                parser.current_span(), "Expected '('", ParseErrorKind::MissingParenthesis});
+            return std::unexpected(
+                ParseError{parser.current_span(),
+                           "Expected '('",
+                           ParseErrorKind::MissingParenthesis});
         }
 
         {
@@ -135,14 +142,17 @@ TEST_F(ParseTest, ScopedGuardUsageExample) {
         }
 
         if (!parser.eat_token(TokenKind::RParen)) {
-            return std::unexpected(ParseError{
-                parser.current_span(), "Expected ')'", ParseErrorKind::MissingParenthesis});
+            return std::unexpected(
+                ParseError{parser.current_span(),
+                           "Expected ')'",
+                           ParseErrorKind::MissingParenthesis});
         }
 
         // 解析函数体
         if (!parser.eat_token(TokenKind::LBrace)) {
-            return std::unexpected(
-                ParseError{parser.current_span(), "Expected '{'", ParseErrorKind::MissingBrace});
+            return std::unexpected(ParseError{parser.current_span(),
+                                              "Expected '{'",
+                                              ParseErrorKind::MissingBrace});
         }
 
         {
@@ -154,14 +164,16 @@ TEST_F(ParseTest, ScopedGuardUsageExample) {
         }
 
         if (!parser.eat_token(TokenKind::RBrace)) {
-            return std::unexpected(
-                ParseError{parser.current_span(), "Expected '}'", ParseErrorKind::MissingBrace});
+            return std::unexpected(ParseError{parser.current_span(),
+                                              "Expected '}'",
+                                              ParseErrorKind::MissingBrace});
         }
 
         // 创建函数定义节点
         NodeBuilder builder(NodeKind::FunctionDef, parser.current_span());
         NodeIndex node_idx = 0; // 临时节点索引
-        // 注意：这里只是演示 ScopedGuard 的使用，实际的 AST 操作需要通过其他方式
+        // 注意：这里只是演示 ScopedGuard 的使用，实际的 AST
+        // 操作需要通过其他方式
         return node_idx;
     }();
 
@@ -172,10 +184,13 @@ TEST_F(ParseTest, ScopedGuardUsageExample) {
 // 测试 ParseError 继承 Issue 的功能
 TEST_F(ParseTest, ParseErrorInheritance) {
     Span test_span{10, 20};
-    String test_message = "Test parse error";
+    String test_message  = "Test parse error";
     DiagLevel test_level = DiagLevel::Error;
 
-    ParseError error(test_span, test_message, ParseErrorKind::InternalError, test_level);
+    ParseError error(test_span,
+                     test_message,
+                     ParseErrorKind::InternalError,
+                     test_level);
 
     // 测试继承的属性访问
     EXPECT_EQ(error.span().start, 10);
