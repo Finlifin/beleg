@@ -52,19 +52,19 @@ struct Span {
     Span(u32 s, u32 e) : start(s), end(e) {
     }
 
-    bool is_valid() const {
+    auto is_valid() const -> bool {
         return start <= end;
     }
 
-    u32 len() const {
+    auto len() const -> u32 {
         return end - start;
     }
 
-    bool contains(u32 pos) const {
+    auto contains(u32 pos) const -> bool {
         return pos >= start && pos < end;
     }
 
-    Span with_offset(u32 offset) const {
+    auto with_offset(u32 offset) const -> Span {
         return Span(start + offset, end + offset);
     }
 
@@ -83,19 +83,19 @@ struct SourceFile {
     SourceFile(String name, String content, u32 start_pos);
 
     // 从字节偏移获取行列信息
-    Location byte_pos_to_location(u32 byte_pos, FileId file_id) const;
+    auto byte_pos_to_location(u32 byte_pos, FileId file_id) const -> Location;
 
     // 从行列信息获取字节偏移
-    std::optional<u32> location_to_byte_pos(u32 line, u32 column) const;
+    auto location_to_byte_pos(u32 line, u32 column) const -> std::optional<u32>;
 
     // 获取指定行的内容
-    std::optional<std::string_view> get_line(u32 line_number) const;
+    auto get_line(u32 line_number) const -> std::optional<std::string_view>;
 
     // 获取 span 对应的源码文本
-    std::optional<std::string_view> get_span_text(const Span& span) const;
+    auto get_span_text(const Span& span) const -> std::optional<std::string_view>;
 
   private:
-    void compute_line_starts();
+    auto compute_line_starts() -> void;
 };
 
 // 源码映射管理器
@@ -109,42 +109,43 @@ class SourceMap {
     SourceMap() = default;
 
     // 添加源文件
-    FileId add_file(const std::string& name, const std::string& content);
+    auto add_file(const std::string& name, const std::string& content) -> FileId;
 
     // 从文件系统加载文件
-    std::optional<FileId> load_file(const std::string& path);
+    auto load_file(const std::string& path) -> std::optional<FileId>;
 
     // 根据文件ID获取源文件
-    const SourceFile* get_file(FileId file_id) const;
+    auto get_file(FileId file_id) const -> const SourceFile*;
 
     // 根据文件名获取文件ID
-    std::optional<FileId> get_file_id(const std::string& name) const;
+    auto get_file_id(const std::string& name) const -> std::optional<FileId>;
 
     // 从全局字节偏移获取位置信息
-    std::optional<Location> lookup_location(u32 global_pos) const;
+    auto lookup_location(u32 global_pos) const -> std::optional<Location>;
 
     // 从位置信息获取全局字节偏移
-    std::optional<u32> lookup_byte_pos(const Location& loc) const;
+    auto lookup_byte_pos(const Location& loc) const -> std::optional<u32>;
 
     // 获取 span 对应的源码文本
-    std::optional<std::string> get_span_text(const Span& span) const;
+    auto get_span_text(const Span& span) const -> std::optional<std::string>;
 
     // 获取指定位置的行内容
-    std::optional<std::string_view> get_line_at_location(const Location& loc) const;
+    auto get_line_at_location(const Location& loc) const -> std::optional<std::string_view>;
 
     // 创建一个新的 span
-    Span make_span(FileId file_id, u32 start_line, u32 start_col, u32 end_line, u32 end_col) const;
+    auto make_span(FileId file_id, u32 start_line, u32 start_col, u32 end_line, u32 end_col) const
+        -> Span;
 
     // 获取所有文件
-    const std::vector<SourceFile>& get_files() const {
+    auto get_files() const -> const std::vector<SourceFile>& {
         return files;
     }
 
     // 格式化位置信息为字符串（用于错误报告）
-    std::string format_location(const Location& loc) const;
+    auto format_location(const Location& loc) const -> std::string;
 
     // 格式化 span 为字符串
-    std::optional<std::string> format_span(const Span& span) const;
+    auto format_span(const Span& span) const -> std::optional<std::string>;
 };
 
 // Hash support for FileId (for unordered containers)

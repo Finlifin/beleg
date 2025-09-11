@@ -7,6 +7,7 @@ subdir('hir')
 subdir('intern')
 subdir('lex')
 subdir('parse')
+subdir('vfs')
 
 inc = [include_directories('.')]
 
@@ -19,7 +20,8 @@ libbeleg = declare_dependency(dependencies: [
     libintern,
     liblex,
     libparse,
-    libsource_map
+    libsource_map,
+    vfs_dep
 ])
 
 beleg_exe = executable('beleg', 'main.cc',

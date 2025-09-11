@@ -1,7 +1,7 @@
 # Tests meson.build
 
 # Module list
-modules = ['ast', 'codegen', 'diag', 'driver', 'hir', 'intern', 'lex', 'parse', 'source_map']
+modules = ['ast', 'codegen', 'diag', 'driver', 'hir', 'intern', 'lex', 'parse', 'source_map', 'vfs']
 
 # Get options
 test_module = get_option('test_module')

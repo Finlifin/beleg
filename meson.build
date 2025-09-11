@@ -22,4 +22,5 @@ subdir('src')
 
 if get_option('build_tests') or get_option('build_demos')
   subdir('tests')
+  subdir('examples')
 endif

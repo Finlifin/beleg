@@ -27,7 +27,7 @@ TEST_F(DiagTest, BasicDiagnostic) {
     std::ostringstream output;
     auto emitter = create_terminal_emitter(output, false, false, &source_map);
 
-    DiagCtxt ctxt({}, &source_map);
+    auto ctxt = DiagCtxt({}, &source_map);
     ctxt.add_emitter(std::move(emitter));
 
     // Create a diagnostic for undefined variable
@@ -52,7 +52,7 @@ TEST_F(DiagTest, ColoredOutput) {
     std::ostringstream output;
     auto emitter = create_terminal_emitter(output, true, false, &source_map);
 
-    DiagCtxt ctxt({}, &source_map);
+    auto ctxt = DiagCtxt({}, &source_map);
     ctxt.add_emitter(std::move(emitter));
 
     Span error_span(35, 53);
@@ -69,7 +69,7 @@ TEST_F(DiagTest, UnicodeOutput) {
     std::ostringstream output;
     auto emitter = create_terminal_emitter(output, false, true, &source_map);
 
-    DiagCtxt ctxt({}, &source_map);
+    auto ctxt = DiagCtxt({}, &source_map);
     ctxt.add_emitter(std::move(emitter));
 
     Span error_span(35, 53);
@@ -88,7 +88,7 @@ TEST_F(DiagTest, MultipleLevels) {
     std::ostringstream output;
     auto emitter = create_terminal_emitter(output, true, false, &source_map);
 
-    DiagCtxt ctxt({}, &source_map);
+    auto ctxt = DiagCtxt({}, &source_map);
     ctxt.add_emitter(std::move(emitter));
 
     Span span1(10, 15);
@@ -123,7 +123,7 @@ TEST_F(DiagTest, ErrorLimits) {
     options.max_errors = 2;
     options.max_warnings = 1;
 
-    DiagCtxt ctxt(options, &source_map);
+    auto ctxt = DiagCtxt(options, &source_map);
     ctxt.add_emitter(std::move(emitter));
 
     Span span(10, 15);

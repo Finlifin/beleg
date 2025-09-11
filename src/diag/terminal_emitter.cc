@@ -44,7 +44,7 @@ struct TerminalStyle {
 };
 
 /// 获取诊断级别的字符串表示
-const char* get_level_string(DiagLevel level) {
+auto get_level_string(DiagLevel level) -> const char* {
     switch (level) {
     case DiagLevel::Fatal:
         return "Fatal";
@@ -77,7 +77,7 @@ class TerminalEmitterImpl : public TerminalEmitter {
           source_map_(source_map) {
     }
 
-    void emit(const Diag& diag) override {
+    auto emit(const Diag& diag) -> void override {
         // 输出主要错误信息
         render_header(diag);
 
@@ -92,7 +92,7 @@ class TerminalEmitterImpl : public TerminalEmitter {
 
   private:
     /// 渲染诊断头部信息
-    void render_header(const Diag& diag) {
+    auto render_header(const Diag& diag) -> void {
         const char* style = TerminalStyle::get_style(diag.level, use_colors_);
         const char* reset = use_colors_ ? TerminalStyle::RESET : "";
 
@@ -107,7 +107,7 @@ class TerminalEmitterImpl : public TerminalEmitter {
     }
 
     /// 渲染标签和源代码上下文
-    void render_labels(const Diag& diag) {
+    auto render_labels(const Diag& diag) -> void {
         // 复制标签并按Span位置排序
         std::vector<Label> sorted_labels = diag.labels;
         std::sort(sorted_labels.begin(), sorted_labels.end(), [](const Label& a, const Label& b) {
@@ -120,7 +120,7 @@ class TerminalEmitterImpl : public TerminalEmitter {
     }
 
     /// 渲染单个标签
-    void render_label(const Label& label, bool is_primary) {
+    auto render_label(const Label& label, bool is_primary) -> void {
         if (!source_map_)
             return;
 
@@ -182,19 +182,19 @@ class TerminalEmitterImpl : public TerminalEmitter {
     }
 
     /// 渲染空行（用于分隔）
-    void render_empty_line(u32 line_width) {
+    auto render_empty_line(u32 line_width) -> void {
         std::string line_spaces(line_width, ' ');
         const char* line_prefix = use_unicode_ ? " │" : " |";
         output_ << " " << line_spaces << line_prefix << "\n";
     }
 
     /// 渲染源代码行（带宽度格式化）
-    void render_source_line_with_width(u32 line_num,
+    auto render_source_line_with_width(u32 line_num,
                                        std::string_view line_text,
                                        const Label& label,
                                        const Location& start_loc,
                                        const std::optional<Location>& end_loc,
-                                       u32 line_width) {
+                                       u32 line_width) -> void {
         const char* line_prefix = use_unicode_ ? " │ " : " | ";
 
         // 格式化行号，右对齐以保持统一宽度
@@ -207,10 +207,10 @@ class TerminalEmitterImpl : public TerminalEmitter {
     }
 
     /// 渲染下划线和指针（带宽度格式化）
-    void render_underline_with_width(const Label& label,
+    auto render_underline_with_width(const Label& label,
                                      const Location& start_loc,
                                      const std::optional<Location>& end_loc,
-                                     u32 line_width) {
+                                     u32 line_width) -> void {
         const char* style = TerminalStyle::get_style(label.level, use_colors_);
         const char* reset = use_colors_ ? TerminalStyle::RESET : "";
         const char* line_prefix = use_unicode_ ? " │ " : " | ";
@@ -265,7 +265,7 @@ class TerminalEmitterImpl : public TerminalEmitter {
     }
 
     /// 渲染备注
-    void render_notes(const Diag& diag) {
+    auto render_notes(const Diag& diag) -> void {
         const char* style = TerminalStyle::get_style(DiagLevel::Note, use_colors_);
         const char* reset = use_colors_ ? TerminalStyle::RESET : "";
 
@@ -276,9 +276,11 @@ class TerminalEmitterImpl : public TerminalEmitter {
 };
 
 // 工厂函数创建终端发射器
-std::unique_ptr<TerminalEmitter> create_terminal_emitter(std::ostream& output,
-                                                         bool use_colors,
-                                                         bool use_unicode,
-                                                         SourceMap* source_map) {
-    return std::make_unique<TerminalEmitterImpl>(output, use_colors, use_unicode, source_map);
+auto create_terminal_emitter(std::ostream& output,
+                             bool use_colors,
+                             bool use_unicode,
+                             SourceMap* source_map) -> std::unique_ptr<TerminalEmitter> {
+    auto emitter =
+        std::make_unique<TerminalEmitterImpl>(output, use_colors, use_unicode, source_map);
+    return emitter;
 }

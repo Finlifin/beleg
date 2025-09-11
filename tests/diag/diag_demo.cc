@@ -21,7 +21,7 @@ int main() {
     std::cout << "\n1. Basic Error Diagnostic:" << std::endl;
     {
         auto emitter = create_terminal_emitter(std::cout, true, true, &source_map);
-        DiagCtxt ctxt(DiagCtxtOptions{}, &source_map);
+        auto ctxt = DiagCtxt(DiagCtxtOptions{}, &source_map);
         ctxt.add_emitter(std::move(emitter));
 
         Span error_span(33, 46);

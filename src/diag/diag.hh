@@ -8,8 +8,36 @@
 #include <iosfwd>
 
 // 通常由各个pass管理，各个pass通过issue 生成diag
-class Issue;
+enum class DiagLevel { Note, Warning, Error, Fatal };
+
 class DiagCtxt;
+
+class Issue {
+  protected:
+    Span span_;
+    String message_;
+    DiagLevel level_;
+
+  public:
+    Issue(Span span, String message, DiagLevel level = DiagLevel::Error)
+        : span_(span), message_(std::move(message)), level_(level) {
+    }
+
+    virtual ~Issue() = default;
+
+    auto span() const -> const Span& {
+        return span_;
+    }
+    auto message() const -> const String& {
+        return message_;
+    }
+    auto level() const -> DiagLevel {
+        return level_;
+    }
+
+    virtual void emit(DiagCtxt& diag_ctx) const = 0;
+};
+
 struct Diag;
 
 /// 诊断上下文选项
@@ -36,12 +64,10 @@ class DiagEmitter {
 class TerminalEmitter : public DiagEmitter {};
 
 // 工厂函数声明
-std::unique_ptr<TerminalEmitter> create_terminal_emitter(std::ostream& output,
-                                                         bool use_colors = true,
-                                                         bool use_unicode = true,
-                                                         SourceMap* source_map = nullptr);
-
-enum class DiagLevel { Note, Warning, Error, Fatal };
+auto create_terminal_emitter(std::ostream& output,
+                             bool use_colors = true,
+                             bool use_unicode = true,
+                             SourceMap* source_map = nullptr) -> std::unique_ptr<TerminalEmitter>;
 
 struct Label {
     Span span;
@@ -72,26 +98,27 @@ class DiagBuilder {
         diag_.primary_span = span;
     }
 
-    DiagBuilder& code(u32 error_code) {
+    auto code(u32 error_code) -> DiagBuilder& {
         diag_.error_code = error_code;
         return *this;
     }
 
-    DiagBuilder& label(const Span& span, const String& text, DiagLevel level = DiagLevel::Error) {
+    auto label(const Span& span, const String& text, DiagLevel level = DiagLevel::Error)
+        -> DiagBuilder& {
         diag_.labels.push_back({span, text, level});
         return *this;
     }
 
-    DiagBuilder& note(const String& note) {
+    auto note(const String& note) -> DiagBuilder& {
         diag_.notes.push_back(note);
         return *this;
     }
 
-    DiagBuilder& span_label(const Span& span, const String& text) {
+    auto span_label(const Span& span, const String& text) -> DiagBuilder& {
         return label(span, text, diag_.level);
     }
 
-    void emit();
+    auto emit() -> void;
 };
 
 // 管理diag，提供diag builder, 向emitter提供diag
@@ -112,22 +139,23 @@ class DiagCtxt {
         : options_(options), source_map_(source_map) {
     }
 
-    void add_emitter(std::unique_ptr<DiagEmitter> emitter) {
+    auto add_emitter(std::unique_ptr<DiagEmitter> emitter) -> void {
         emitters_.push_back(std::move(emitter));
     }
 
-    void emit(const Diag& diag);
+    auto emit(const Diag& diag) -> void;
 
-    bool can_emit(DiagLevel level) const;
+    auto can_emit(DiagLevel level) const -> bool;
 
-    u32 error_count() const {
+    auto error_count() const -> u32 {
         return error_count_;
     }
-    u32 warning_count() const {
+    auto warning_count() const -> u32 {
         return warning_count_;
     }
 
-    auto diag_builder(DiagLevel level, const String& primary_message, const Span& primary_span) {
+    auto diag_builder(DiagLevel level, const String& primary_message, const Span& primary_span)
+        -> DiagBuilder {
         return DiagBuilder(this, level, primary_message, primary_span);
     }
 };

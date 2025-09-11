@@ -8,7 +8,7 @@ SourceFile::SourceFile(String name, String content, u32 start_pos)
     compute_line_starts();
 }
 
-void SourceFile::compute_line_starts() {
+auto SourceFile::compute_line_starts() -> void {
     line_starts.clear();
     line_starts.push_back(0); // First line starts at byte 0
 
@@ -19,7 +19,7 @@ void SourceFile::compute_line_starts() {
     }
 }
 
-Location SourceFile::byte_pos_to_location(u32 byte_pos, FileId file_id) const {
+auto SourceFile::byte_pos_to_location(u32 byte_pos, FileId file_id) const -> Location {
     if (byte_pos >= content.size()) {
         // Handle EOF position
         if (line_starts.empty()) {
@@ -41,7 +41,7 @@ Location SourceFile::byte_pos_to_location(u32 byte_pos, FileId file_id) const {
     return Location(file_id, line_number, column);
 }
 
-std::optional<u32> SourceFile::location_to_byte_pos(u32 line, u32 column) const {
+auto SourceFile::location_to_byte_pos(u32 line, u32 column) const -> std::optional<u32> {
     if (line == 0 || line > line_starts.size()) {
         return std::nullopt;
     }
@@ -66,7 +66,7 @@ std::optional<u32> SourceFile::location_to_byte_pos(u32 line, u32 column) const 
     return byte_pos;
 }
 
-std::optional<std::string_view> SourceFile::get_line(u32 line_number) const {
+auto SourceFile::get_line(u32 line_number) const -> std::optional<std::string_view> {
     if (line_number == 0 || line_number > line_starts.size()) {
         return std::nullopt;
     }
@@ -88,14 +88,14 @@ std::optional<std::string_view> SourceFile::get_line(u32 line_number) const {
     return std::string_view(content.data() + start, end - start);
 }
 
-std::optional<std::string_view> SourceFile::get_span_text(const Span& span) const {
+auto SourceFile::get_span_text(const Span& span) const -> std::optional<std::string_view> {
     if (!span.is_valid() || span.end > content.size()) {
         return std::nullopt;
     }
     return std::string_view(content.data() + span.start, span.len());
 }
 
-FileId SourceMap::add_file(const std::string& name, const std::string& content) {
+auto SourceMap::add_file(const std::string& name, const std::string& content) -> FileId {
     // Check if file already exists
     auto it = file_id_map.find(name);
     if (it != file_id_map.end()) {
@@ -105,7 +105,8 @@ FileId SourceMap::add_file(const std::string& name, const std::string& content) 
     u32 file_id = static_cast<u32>(files.size());
     FileId fid(file_id);
 
-    files.emplace_back(name, content, next_start_pos);
+    auto source_file = SourceFile(name, content, next_start_pos);
+    files.push_back(std::move(source_file));
     file_id_map[name] = fid;
 
     next_start_pos += static_cast<u32>(content.size());
@@ -113,7 +114,7 @@ FileId SourceMap::add_file(const std::string& name, const std::string& content) 
     return fid;
 }
 
-std::optional<FileId> SourceMap::load_file(const std::string& path) {
+auto SourceMap::load_file(const std::string& path) -> std::optional<FileId> {
     // Check if file already loaded
     auto it = file_id_map.find(path);
     if (it != file_id_map.end()) {
@@ -134,14 +135,14 @@ std::optional<FileId> SourceMap::load_file(const std::string& path) {
     return add_file(path, content);
 }
 
-const SourceFile* SourceMap::get_file(FileId file_id) const {
+auto SourceMap::get_file(FileId file_id) const -> const SourceFile* {
     if (file_id.id >= files.size()) {
         return nullptr;
     }
     return &files[file_id.id];
 }
 
-std::optional<FileId> SourceMap::get_file_id(const std::string& name) const {
+auto SourceMap::get_file_id(const std::string& name) const -> std::optional<FileId> {
     auto it = file_id_map.find(name);
     if (it != file_id_map.end()) {
         return it->second;
@@ -149,7 +150,7 @@ std::optional<FileId> SourceMap::get_file_id(const std::string& name) const {
     return std::nullopt;
 }
 
-std::optional<Location> SourceMap::lookup_location(u32 global_pos) const {
+auto SourceMap::lookup_location(u32 global_pos) const -> std::optional<Location> {
     // Find which file contains this global position
     for (u32 i = 0; i < files.size(); ++i) {
         const auto& file = files[i];
@@ -163,7 +164,7 @@ std::optional<Location> SourceMap::lookup_location(u32 global_pos) const {
     return std::nullopt;
 }
 
-std::optional<u32> SourceMap::lookup_byte_pos(const Location& loc) const {
+auto SourceMap::lookup_byte_pos(const Location& loc) const -> std::optional<u32> {
     const SourceFile* file = get_file(loc.file);
     if (!file) {
         return std::nullopt;
@@ -177,7 +178,7 @@ std::optional<u32> SourceMap::lookup_byte_pos(const Location& loc) const {
     return file->start_pos + *local_pos;
 }
 
-std::optional<std::string> SourceMap::get_span_text(const Span& span) const {
+auto SourceMap::get_span_text(const Span& span) const -> std::optional<std::string> {
     // Check if span is valid
     if (!span.is_valid()) {
         return std::nullopt;
@@ -210,7 +211,7 @@ std::optional<std::string> SourceMap::get_span_text(const Span& span) const {
     return (covered_end >= span.end) ? std::optional<std::string>(result) : std::nullopt;
 }
 
-std::optional<std::string_view> SourceMap::get_line_at_location(const Location& loc) const {
+auto SourceMap::get_line_at_location(const Location& loc) const -> std::optional<std::string_view> {
     const SourceFile* file = get_file(loc.file);
     if (!file) {
         return std::nullopt;
@@ -219,11 +220,11 @@ std::optional<std::string_view> SourceMap::get_line_at_location(const Location& 
     return file->get_line(loc.line);
 }
 
-Span SourceMap::make_span(FileId file_id,
+auto SourceMap::make_span(FileId file_id,
                           u32 start_line,
                           u32 start_col,
                           u32 end_line,
-                          u32 end_col) const {
+                          u32 end_col) const -> Span {
     const SourceFile* file = get_file(file_id);
     if (!file) {
         return Span();
@@ -242,7 +243,7 @@ Span SourceMap::make_span(FileId file_id,
     return Span(global_start, global_end);
 }
 
-std::string SourceMap::format_location(const Location& loc) const {
+auto SourceMap::format_location(const Location& loc) const -> std::string {
     const SourceFile* file = get_file(loc.file);
     if (!file) {
         return "<unknown>";
@@ -254,7 +255,7 @@ std::string SourceMap::format_location(const Location& loc) const {
     return oss.str();
 }
 
-std::optional<std::string> SourceMap::format_span(const Span& span) const {
+auto SourceMap::format_span(const Span& span) const -> std::optional<std::string> {
     auto start_loc = lookup_location(span.start);
     auto end_loc = lookup_location(span.end - 1); // end is exclusive
 

@@ -1,6 +1,6 @@
 #include "diag/diag.hh"
 
-void DiagCtxt::emit(const Diag& diag) {
+auto DiagCtxt::emit(const Diag& diag) -> void {
     // 检查是否可以发射此级别的诊断
     if (!can_emit(diag.level)) {
         return;
@@ -25,7 +25,7 @@ void DiagCtxt::emit(const Diag& diag) {
     }
 }
 
-bool DiagCtxt::can_emit(DiagLevel level) const {
+auto DiagCtxt::can_emit(DiagLevel level) const -> bool {
     switch (level) {
     case DiagLevel::Error:
     case DiagLevel::Fatal:
@@ -39,7 +39,7 @@ bool DiagCtxt::can_emit(DiagLevel level) const {
     }
 }
 
-void DiagBuilder::emit() {
+auto DiagBuilder::emit() -> void {
     if (ctxt_) {
         ctxt_->emit(diag_);
     }
