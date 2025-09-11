@@ -18,18 +18,19 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
+        apt-get update
+        apt-get install -y \
           ninja-build \
           pkg-config \
           python3 \
-          python3-pip
+          python3-pip \
+          python3-setuptools \
+          python3-wheel
 
     - name: Install Meson
       run: |
-        pip3 install --upgrade pip
-        pip3 install meson
+        pip3 install --break-system-packages --upgrade pip
+        pip3 install --break-system-packages meson
 
     - name: Cache Meson and Ninja
       uses: actions/cache@v4
