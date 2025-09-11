@@ -9,46 +9,25 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    container: gcc:15  # Alternative: Use GCC 15 container
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
+        apt-get update
+        apt-get install -y \
           ninja-build \
           pkg-config \
           python3 \
-          python3-pip \
-          software-properties-common
-
-    - name: Install GCC 15
-      run: |
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-        sudo apt-get update
-        sudo apt-get install -y gcc-15 g++-15
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-15 100
-        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-15 100
-        gcc --version
-        g++ --version
+          python3-pip
 
     - name: Install Meson
       run: |
         pip3 install --upgrade pip
         pip3 install meson
 
-    - name: Cache Meson and Ninja
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cache/meson
-          ~/.cache/ninja
-        key: ${{ runner.os }}-meson-ninja-${{ hashFiles('**/meson.build') }}
-        restore-keys: |
-          ${{ runner.os }}-meson-ninja-
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Setup build directory
       run: |
