@@ -1,0 +1,4 @@
+option('build_tests', type : 'boolean', value : true, description : 'Build tests')
+option('build_demos', type : 'boolean', value : true, description : 'Build functional demos')  
+option('test_module', type : 'string', value : '', description : 'Specific module to test (ast, codegen, diag, driver, hir, intern, lex, parse, source_map)')
+option('demo_module', type : 'string', value : '', description : 'Specific module demo to build (ast, codegen, diag, driver, hir, intern, lex, parse, source_map)')
